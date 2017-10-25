@@ -1,0 +1,20 @@
+group 'sel'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "com.sparkjava:spark-core:2.6.0"
+    compile "org.slf4j:slf4j-simple:1.7.21"
+    // https://mvnrepository.com/artifact/org.json/json
+    compile group: 'org.json', name: 'json', version: '20171018'
+
+    compile files('lib/selenium-server-standalone-3.6.0.jar')
+
+}
