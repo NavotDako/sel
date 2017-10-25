@@ -21,12 +21,15 @@ import static spark.Spark.*;
 public class sparkServer {
     private static final String CHROME_DRIVER = "lib\\chromedriver.exe";
     static Map<String,WebDriver> driversList = new HashMap<>();
+    static Map<String,String> elementsList = new HashMap<>();
+
 
     public static void main(String[] args) {
 
         port(4001);
         final String[] reqOld = {"Not Yet!"};
         System.setProperty("webdriver.chrome.driver",CHROME_DRIVER);
+        get("/session", (req, res) -> "hello");
 
         post("/session", (req, res) -> {
             System.out.println("sever->newSession");
@@ -77,22 +80,46 @@ public class sparkServer {
         post("/session/:sessionId/element", (req, res) -> {
 
             System.out.println("driver.findElement");
-            System.out.println("Body -\n"+req.body());
+//            System.out.println("Body -\n"+req.body());
 
             Gson gson = new Gson();
             Type type = new TypeToken<Map<String, String>>(){}.getType();
             Map<String, String> myMap = gson.fromJson(req.body(), type);
 
-            WebElement value = driversList.get(req.params(":sessionId")).findElement(By.xpath(myMap.get("value")));
-            String id = ((RemoteWebElement) value).getId();
+            WebElement element = driversList.get(req.params(":sessionId")).findElement(By.xpath(myMap.get("value")));
+            String id = ((RemoteWebElement) element).getId();
             HashMap<String, String> stringStringHashMap = new HashMap<>();
             stringStringHashMap.put("ELEMENT",id);
-            System.out.println("id - "+id);
+            elementsList.put(id,myMap.get("value"));
+//            System.out.println("id - "+id);
+
             Map<String, Object> map = new HashMap<>();
             map.put("sessionId", req.params(":sessionId"));
             map.put("value", stringStringHashMap);
             map.put("status", "0");
             return map;
+        });
+
+        post("/session/:sessionId/element/:elementId/click", (req, res) -> {
+            Map<String, Object> returnMap = new HashMap<>();
+            System.out.println("driver.click");
+            System.out.println("Body -\n"+req.body());
+            System.out.println(req.params(":sessionId") +" - "+ req.params(":elementId"));
+            driversList.get(req.params(":sessionId")).findElement(By.xpath(elementsList.get(req.params(":elementId")))).click();
+//            Gson gson = new Gson();
+//            Type type = new TypeToken<Map<String, String>>(){}.getType();
+//            Map<String, String> myMap = gson.fromJson(req.body(), type);
+//
+//            WebElement value = driversList.get(req.params(":sessionId")).findElement(By.xpath(myMap.get("value")));
+//            String id = ((RemoteWebElement) value).getId();
+//            HashMap<String, String> stringStringHashMap = new HashMap<>();
+//            stringStringHashMap.put("ELEMENT",id);
+//            System.out.println("id - "+id);
+//
+//            returnMap.put("sessionId", req.params(":sessionId"));
+//            returnMap.put("value", stringStringHashMap);
+//            returnMap.put("status", "0");
+            return returnMap;
         });
 
     }

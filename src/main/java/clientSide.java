@@ -13,7 +13,9 @@ import java.net.URL;
  */
 public class clientSide {
     public static void main(String[] args) throws MalformedURLException {
-        String url = "http://localhost:4001";
+//        String url = "http://localhost:4000";
+        String url = "http://127.0.0.1:4001";
+
         DesiredCapabilities dc = new DesiredCapabilities();//.chrome();
         dc.setCapability("user", "admin");
         dc.setCapability("password", "Experitest2012");
@@ -22,8 +24,8 @@ public class clientSide {
         RemoteWebDriver driver = new RemoteWebDriver(new URL(url), dc);
         System.out.println(driver.getCapabilities());
         driver.get("http://www.google.com");
-        WebElement element = driver.findElement(By.xpath("//div"));
+        RemoteWebElement element = (RemoteWebElement)driver.findElement(By.xpath("//*[@id='gbwa']/div[1]/a"));
         System.out.println(((RemoteWebElement)element).getId());
-        ((RemoteWebElement)element).click();
+        element.click();
     }
 }
