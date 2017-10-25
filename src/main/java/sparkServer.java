@@ -29,7 +29,7 @@ public class sparkServer {
         port(4001);
         final String[] reqOld = {"Not Yet!"};
         System.setProperty("webdriver.chrome.driver",CHROME_DRIVER);
-        get("/session", (req, res) -> "hello");
+        get("/session", (req, res) -> "We Are Alive!");
 
         post("/session", (req, res) -> {
             System.out.println("sever->newSession");
@@ -78,7 +78,7 @@ public class sparkServer {
         });
 
         post("/session/:sessionId/element", (req, res) -> {
-
+            Map<String, Object> returnMap = new HashMap<>();
             System.out.println("driver.findElement");
 //            System.out.println("Body -\n"+req.body());
 
@@ -86,18 +86,25 @@ public class sparkServer {
             Type type = new TypeToken<Map<String, String>>(){}.getType();
             Map<String, String> myMap = gson.fromJson(req.body(), type);
 
-            WebElement element = driversList.get(req.params(":sessionId")).findElement(By.xpath(myMap.get("value")));
-            String id = ((RemoteWebElement) element).getId();
-            HashMap<String, String> stringStringHashMap = new HashMap<>();
-            stringStringHashMap.put("ELEMENT",id);
-            elementsList.put(id,myMap.get("value"));
-//            System.out.println("id - "+id);
+            HashMap<String, String> stringStringHashMap = null;
+            try {
+                WebElement element = driversList.get(req.params(":sessionId")).findElement(By.xpath(myMap.get("value")));
+                String id = ((RemoteWebElement) element).getId();
+                stringStringHashMap = new HashMap<>();
+                stringStringHashMap.put("ELEMENT",id);
+                elementsList.put(id,myMap.get("value"));
+                returnMap.put("sessionId", req.params(":sessionId"));
+                returnMap.put("value", stringStringHashMap);
+                returnMap.put("status", "0");
+                return returnMap;
+            } catch (Exception e) {
+                e.printStackTrace();
+                returnMap.put("status", getStatusFromClass(e.getClass()));
+                returnMap.put("sessionId", req.params(":sessionId"));
+                returnMap.put("value", "Element - "+myMap.get("value"));
+            }
 
-            Map<String, Object> map = new HashMap<>();
-            map.put("sessionId", req.params(":sessionId"));
-            map.put("value", stringStringHashMap);
-            map.put("status", "0");
-            return map;
+            return returnMap;
         });
 
         post("/session/:sessionId/element/:elementId/click", (req, res) -> {
@@ -105,22 +112,22 @@ public class sparkServer {
             System.out.println("driver.click");
             System.out.println("Body -\n"+req.body());
             System.out.println(req.params(":sessionId") +" - "+ req.params(":elementId"));
-            driversList.get(req.params(":sessionId")).findElement(By.xpath(elementsList.get(req.params(":elementId")))).click();
-//            Gson gson = new Gson();
-//            Type type = new TypeToken<Map<String, String>>(){}.getType();
-//            Map<String, String> myMap = gson.fromJson(req.body(), type);
+            try{
+                driversList.get(req.params(":sessionId")).findElement(By.xpath(elementsList.get(req.params(":elementId")))).click();
+                returnMap.put("status", "0");
+            }catch (Exception e){
+                returnMap.put("status", "1");
+            }
 //
-//            WebElement value = driversList.get(req.params(":sessionId")).findElement(By.xpath(myMap.get("value")));
-//            String id = ((RemoteWebElement) value).getId();
-//            HashMap<String, String> stringStringHashMap = new HashMap<>();
-//            stringStringHashMap.put("ELEMENT",id);
-//            System.out.println("id - "+id);
-//
-//            returnMap.put("sessionId", req.params(":sessionId"));
-//            returnMap.put("value", stringStringHashMap);
-//            returnMap.put("status", "0");
             return returnMap;
         });
 
+    }
+
+    private static String getStatusFromClass(Class<? extends Exception> aClass) {
+        if (aClass.getName().equals("org.openqa.selenium.NoSuchElementException")) {
+            return "7";
+        }
+        return "0";
     }
 }

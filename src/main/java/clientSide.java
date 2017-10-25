@@ -24,7 +24,7 @@ public class clientSide {
         RemoteWebDriver driver = new RemoteWebDriver(new URL(url), dc);
         System.out.println(driver.getCapabilities());
         driver.get("http://www.google.com");
-        RemoteWebElement element = (RemoteWebElement)driver.findElement(By.xpath("//*[@id='gbwa']/div[1]/a"));
+        RemoteWebElement element = (RemoteWebElement)driver.findElement(By.xpath("//*[@id='gbwa']/div[1]/a1"));
         System.out.println(((RemoteWebElement)element).getId());
         element.click();
     }
