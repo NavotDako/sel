@@ -1,0 +1,1 @@
+java -Dwebdriver.chrome.driver="C:\Users\DELL\Desktop\selenium\chromedriver.exe" -jar selenium-server-standalone-3.4.0.jar -role node  -hub http://localhost:4444/grid/register
